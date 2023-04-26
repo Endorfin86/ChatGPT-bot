@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  bot: 
+    build: .
+    restart: always #перезапускать при падении сервера
+    networks:
+      - pg_network #сеть в которой запущен образ
+    depends_on:
+      - postgres #этот сервис bot зависит от сервиса postgres
+    volumes:
+      - S:/ChatGPT:/app #рабочая директория app в контейнере связана с папка aTechNutrition на диске C:/  
+  
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres #имя пользователя для подключения базы данных (любое)
+      POSTGRES_PASSWORD: postgres #пароль пользователя для подключения к базе данных (любое)
+      POSTGRES_DB: botgpt #имя базы данных, к которой будим подключаться (любое)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - pg_network
+
+  phppgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@endorfin.ru #логин для входа в интерфейс бд (http://localhost:8080)
+      PGADMIN_DEFAULT_PASSWORD: Host86rc #пароль для входа в интерфейс бд (http://localhost:8080)
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres #этот сервис phppgadmin зависит от сервиса postgres
+    networks:
+      - pg_network
+
+networks:
+  pg_network:
+
+volumes:
+  postgres_data:
+
