@@ -86,6 +86,22 @@ async def message_user(message : types.Message):
                             frequency_penalty=0,
                             presence_penalty=0.6,
                         )
+                        answer = response.choices[0].text
+                        # for el in answer[0:14]:
+                        #     if el == ':':
+                        #         answer = answer.split(':')[1]
+                        answer = answer.replace('\n', '')
+
+                        #отправка ответа пользователю и удаление прелоад-сообщения
+                        await bot.send_message(message.from_user.id, answer, reply_markup=keybord_main)
+                        await bot.delete_message(chat_id=message.chat.id, message_id=sent_message_id)
+                        #проверяем пользователя на наличие лимитов по подписке
+                        if requests[0]["requests"] > 0 and days[0]["days"] == 0:
+                            #если в подписке нет дней, снимаем 1 запрос
+                            await sql_db.sql_minus_requests(message.from_user.id, requests[0]["requests"] - 1)
+                        requests = await sql_db.sql_check_limit_requests(message.from_user.id)
+                        #### print(context)
+                        await sql_db.sql_add_context(message.from_user.id, message_text + '\n' + answer)
                     except Exception:
                         print('Привышен программный лимит по символам')
                         await bot.delete_message(chat_id=message.chat.id, message_id=sent_message_id)
@@ -95,24 +111,6 @@ async def message_user(message : types.Message):
                         print('Контекст очищен')
                         await bot.send_message(message.from_user.id, '🗑 Память бота очищена')
                         await bot.send_message(message.from_user.id, '🤖 Начните разговор заново или спросите что-нибудь...')
-                    #получение ответа от ChatGPT
-
-                    answer = response.choices[0].text
-                    # for el in answer[0:14]:
-                    #     if el == ':':
-                    #         answer = answer.split(':')[1]
-                    answer = answer.replace('\n', '')
-
-                    #отправка ответа пользователю и удаление прелоад-сообщения
-                    await bot.send_message(message.from_user.id, answer, reply_markup=keybord_main)
-                    await bot.delete_message(chat_id=message.chat.id, message_id=sent_message_id)
-                    #проверяем пользователя на наличие лимитов по подписке
-                    if requests[0]["requests"] > 0 and days[0]["days"] == 0:
-                        #если в подписке нет дней, снимаем 1 запрос
-                        await sql_db.sql_minus_requests(message.from_user.id, requests[0]["requests"] - 1)
-                    requests = await sql_db.sql_check_limit_requests(message.from_user.id)
-                    #### print(context)
-                    await sql_db.sql_add_context(message.from_user.id, message_text + '\n' + answer)
                 else:
                     await bot.send_message(message.from_user.id, '⚠ У Вас закончилась подписка, необходимо ее продлить')
         else:
