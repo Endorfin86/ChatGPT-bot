@@ -22,7 +22,7 @@ reply_markup=ikeyboard_oppo)
 async def btn_premium(message : types.Message):
     await message.delete()
     days = await sql_db.sql_check_limit_days(message.from_user.id)
-    days = requests[0]['days']
+    days = days[0]['days']
     requests = await sql_db.sql_check_limit_requests(message.from_user.id)
     requests = requests[0]['requests']
     await bot.send_message(message.from_user.id, 
