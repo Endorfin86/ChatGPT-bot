@@ -9,7 +9,7 @@ services:
     depends_on:
       - postgres #этот сервис bot зависит от сервиса postgres
     volumes:
-      - S:/ChatGPT:/app #рабочая директория app в контейнере связана с папка aTechNutrition на диске C:/  
+      - /app:/app #рабочая директория app в контейнере связана с папка aTechNutrition на диске C:/  
   
   postgres:
     image: postgres
